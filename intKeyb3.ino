@@ -7,13 +7,13 @@ const unsigned long DEBOUNCETIME = 100;
 volatile unsigned long previousMillis = 0;
 volatile unsigned short numberOfButtonInterrupts = 0;
 volatile unsigned short lastState;
+volatile short rowState = -1;
 bool prevState;
 unsigned long prec=0;
 unsigned long step = 0;
 // Arduino Uno source
 int keyInterrupt = 2;
 volatile short row = -1;
-volatile short rowState = HIGH;
 volatile short col = -1;
 
 char hexaKeys[ROWS][COLS] = {
