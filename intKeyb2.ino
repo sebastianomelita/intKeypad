@@ -66,7 +66,6 @@ ISR (PCINT2_vect) // handle pin change interrupt for D8 to D13 here
   rowState = -1;
   for(row = 0;(row < ROWS) && (rowState == -1); row++){
 	  lastState = digitalRead(intRow[row]);
-	  lastState = digitalRead(intRow[row]);
 	  if(lastState == LOW){
 		  rowState = row;
 		  col = -1;
