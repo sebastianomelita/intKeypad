@@ -49,7 +49,7 @@ void debounce(){
 		//Serial.println(" in SALITA");
     }else{
 		//Serial.println(" in DISCESA");
-		if (row != -1) {
+		if (rowState != -1) {
 		  //Serial.print(row); Serial.print(" - "); Serial.println(col);
 		  doBtnAction(row, col);
 		}
@@ -62,13 +62,14 @@ void debounce(){
 ISR (PCINT2_vect) // handle pin change interrupt for D8 to D13 here
 {
   previousMillis = millis(); // tempo evento
-  
-  if ((lastState = digitalRead(intRow[0]))==0) {row = 0;}
-  else if ((lastState = digitalRead(intRow[1]))==0) {row = 1;}
-  else if ((lastState = digitalRead(intRow[2]))==0) {row = 2;}
-  else if ((lastState = digitalRead(intRow[3]))==0) {row = 3;}
+  row = 0;
+  rowState = -1;
+  if ((lastState = digitalRead(intRow[0]))==0) {row = rowState = 0;}
+  else if ((lastState = digitalRead(intRow[1]))==0) {row = rowState = 1;}
+  else if ((lastState = digitalRead(intRow[2]))==0) {row = rowState = 2;}
+  else if ((lastState = digitalRead(intRow[3]))==0) {row = rowState = 3;}
   // Scan column
-  if (row != -1) {
+  if (rowState != -1) {
     digitalWrite(intCols[0], HIGH);
     if (col == -1 && digitalRead(intRow[row])==1) {
       col = 0;
