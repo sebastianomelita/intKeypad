@@ -61,7 +61,6 @@ void debounce(){
 
 ISR (PCINT2_vect) // handle pin change interrupt for D8 to D13 here
 {
-  numberOfButtonInterrupts++; // contatore rimbalzi
   previousMillis = millis(); // tempo evento
   
   if ((lastState = digitalRead(intRow[0]))==0) {row = 0;}
@@ -93,6 +92,7 @@ ISR (PCINT2_vect) // handle pin change interrupt for D8 to D13 here
   }
   PCIFR |= (1 << PCIF2);   // clear any outstanding interrupts
   //PCICR |= (1 << PCIE2);   // set change interrupt
+  numberOfButtonInterrupts++; // contatore rimbalzi
 }
 
 void setup() {
