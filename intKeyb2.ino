@@ -74,14 +74,13 @@ ISR (PCINT2_vect) // handle pin change interrupt for D8 to D13 here
 				digitalWrite(intCols[j], HIGH);
 				if(digitalRead(intRow[row])==HIGH){ //genera interrupt che si memorizzano
 					col = j;
-					// segnala solo se row > 0 e col > 0
 				}
 				digitalWrite(intCols[j], LOW);
 		  }
 	  }
   } 
   PCIFR |= (1 << PCIF2);  //cancella gli interrupt memorizzati
-  numberOfButtonInterrupts++; // contatore rimbalzi e flag segnalazione
+  numberOfButtonInterrupts++; // contatore rimbalzi e flag segnalazione per entrambi i fronti
 }
 
 void setup() {
@@ -102,6 +101,7 @@ void setup() {
   pinMode(intRow[1], INPUT_PULLUP);
   pinMode(intRow[2], INPUT_PULLUP);
   pinMode(intRow[3], INPUT_PULLUP);
+  prevState = HIGH; // si parte da pulsante rilasciato
 
   Serial.println("GO"); 
   //Arduino Mega interrupts settings
