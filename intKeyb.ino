@@ -49,21 +49,20 @@ void debounce(){
 		//Serial.println(" in SALITA");
     }else{
 		//Serial.println(" in DISCESA");
-		if (rowState != -1) {
-		  //Serial.print(row); Serial.print(" - "); Serial.println(col);
-		  doBtnAction(row, col);
-		}
+	    //Serial.print(row); Serial.print(" - "); Serial.println(col);
+	    doBtnAction(row, col);
     }
-    col = -1;
-    row = -1;
   }
 }
 
 ISR (PCINT2_vect) // handle pin change interrupt for D8 to D13 here
 {
   previousMillis = millis(); // tempo evento
-  row = 0;
-  rowState = -1;
+  // default rilascio: fronte di salita su un tasto qualsiasi (0,0)
+  row = 0; 
+  lastState = HIGH;
+  unsigned short rowState = -1;
+  col = -1;
   if ((lastState = digitalRead(intRow[0]))==0) {row = rowState = 0;}
   else if ((lastState = digitalRead(intRow[1]))==0) {row = rowState = 1;}
   else if ((lastState = digitalRead(intRow[2]))==0) {row = rowState = 2;}
@@ -114,6 +113,7 @@ void setup() {
   pinMode(intRow[1], INPUT_PULLUP);
   pinMode(intRow[2], INPUT_PULLUP);
   pinMode(intRow[3], INPUT_PULLUP);
+  prevState = HIGH; // si parte da pulsante rilasciato
 
   Serial.println("GO"); 
   //Arduino Mega interrupts settings
