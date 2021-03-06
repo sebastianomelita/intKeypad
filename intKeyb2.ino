@@ -7,7 +7,6 @@ const unsigned long DEBOUNCETIME = 50;
 volatile unsigned long previousMillis = 0;
 volatile unsigned short numberOfButtonInterrupts = 0;
 volatile unsigned short lastState;
-volatile short rowState = -1;
 bool prevState;
 unsigned long prec=0;
 unsigned long step = 0;
@@ -50,10 +49,8 @@ void debounce(){
 		//Serial.println(" in SALITA");
     }else{
 		//Serial.println(" in DISCESA");
-		if (rowState != -1) {
 		    //Serial.print(row); Serial.print(" - "); Serial.println(col);
 		    doBtnAction(row, col);
-		}
     }
     //col = -1;
     //row = -1;
@@ -63,22 +60,26 @@ void debounce(){
 ISR (PCINT2_vect) // handle pin change interrupt for D8 to D13 here
 {
   previousMillis = millis(); // tempo evento
-  rowState = -1;
-  for(row = 0;(row < ROWS) && (rowState == -1); row++){
-	  lastState = digitalRead(intRow[row]);
+  // default rilascio: fronte di salita su un tasto qualsiasi (0,0)
+  row = 0; 
+  //col = 0;  
+  lastState = HIGH;
+  // rivelatore di pressione: fronte di discesa (sul tasto effettivamente premuto)
+  for(short i=0; (lastState != LOW) && (i < ROWS); i++){
+	  lastState = digitalRead(intRow[i]);
 	  if(lastState == LOW){
-		  rowState = row;
+		  row = i;
 		  col = -1;
-		  for(short i=0; (col == -1) && (i < COLS); i++){
-				digitalWrite(intCols[i], HIGH);
+		  for(short j=0; (col == -1) && (j < COLS); j++){
+				digitalWrite(intCols[j], HIGH);
 				if(digitalRead(intRow[row])==HIGH){ //genera interrupt che si memorizzano
-					col = i;
+					col = j;
+					// segnala solo se row > 0 e col > 0
 				}
-				digitalWrite(intCols[i], LOW);
+				digitalWrite(intCols[j], LOW);
 		  }
 	  }
   } 
-  row--;
   PCIFR |= (1 << PCIF2);  //cancella gli interrupt memorizzati
   numberOfButtonInterrupts++; // contatore rimbalzi e flag segnalazione
 }
