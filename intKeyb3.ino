@@ -7,7 +7,6 @@ const unsigned long DEBOUNCETIME = 100;
 volatile unsigned long previousMillis = 0;
 volatile unsigned short numberOfButtonInterrupts = 0;
 volatile unsigned short lastState;
-volatile short rowState = -1;
 bool prevState;
 unsigned long prec=0;
 unsigned long step = 0;
@@ -50,37 +49,31 @@ void debounce(){
 		//Serial.println(" in SALITA");
     }else{
 		//Serial.println(" in DISCESA");
-		if (rowState != -1) {
-			PCIFR |= (1 << PCIF2);   // clear any outstanding interrupts
-			PCICR &= ~(1 << PCIE2);  // reset change interrupt
-			col = -1;
-			for(short i=0; (col == -1) && (i < COLS); i++){
-				digitalWrite(intCols[i], HIGH);
-				if(digitalRead(intRow[row])==HIGH){ //genera interrupt che si memorizzano
-					col = i;
-				}
-				digitalWrite(intCols[i], LOW);
-		    }
-			PCIFR |= (1 << PCIF2);   // clear any outstanding interrupts
-			PCICR |= (1 << PCIE2);   // set change interrupt
-			//Serial.print(row); Serial.print(" - "); Serial.println(col);
-		    doBtnAction(row, col);
+		PCIFR |= (1 << PCIF2);   // clear any outstanding interrupts
+		PCICR &= ~(1 << PCIE2);  // reset change interrupt
+		col = -1;
+		for(short i=0; (col == -1) && (i < COLS); i++){
+			digitalWrite(intCols[i], HIGH);
+			if(digitalRead(intRow[row])==HIGH){ //genera interrupt che si memorizzano
+				col = i;
+			}
+			digitalWrite(intCols[i], LOW);
 		}
+		PCIFR |= (1 << PCIF2);   // clear any outstanding interrupts
+		PCICR |= (1 << PCIE2);   // set change interrupt
+		//Serial.print(row); Serial.print(" - "); Serial.println(col);
+		doBtnAction(row, col);
     }
-    //col = -1;
-    //row = -1;
   }
 }
 
 ISR (PCINT2_vect) // handle pin change interrupt for D8 to D13 here
 {  
   previousMillis = millis(); // tempo evento
-  rowState = -1;
-  for(row = 0;(row < ROWS) && (rowState == -1); row++){
+  // default rilascio: fronte di salita su un tasto qualsiasi (0,0)
+  lastState = HIGH;
+  for(row = 0; (row < ROWS) && (lastState == HIGH); row++){
 	  lastState = digitalRead(intRow[row]);
-	  if(lastState == LOW){
-		  rowState = row;
-	  }
   } 
   row--;
   numberOfButtonInterrupts++; // contatore rimbalzi
@@ -104,6 +97,7 @@ void setup() {
   pinMode(intRow[1], INPUT_PULLUP);
   pinMode(intRow[2], INPUT_PULLUP);
   pinMode(intRow[3], INPUT_PULLUP);
+  prevState = HIGH; // si parte da pulsante rilasciato
 
   Serial.println("GO"); 
   //Arduino Mega interrupts settings
